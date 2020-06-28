@@ -1,0 +1,9 @@
+sample:
+  name: Minimal Positioning Beacon
+  description: Connectionless BLE Beacon for positioning that runs directly on top of the nrfx library
+tests:
+  samples.minimal_positioning_beacon:
+    build_only: true
+    build_on_all: true
+    platform_whitelist: nrf52dk_nrf52832 nrf52840dk_nrf52840 nrf5340pdk_nrf5340_cpunet nrf52840dongle_nrf52840
+    tags: ci_build
