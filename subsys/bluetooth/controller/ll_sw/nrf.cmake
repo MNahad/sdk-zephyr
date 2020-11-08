@@ -17,6 +17,10 @@ if(CONFIG_BT_LL_SW_SPLIT)
       CONFIG_BT_CTLR_ADV_PERIODIC
       ll_sw/nordic/lll/lll_adv_sync.c
       )
+    zephyr_library_sources_ifdef(
+      CONFIG_BT_CTLR_DF_SOFTCTE
+    	$ENV{ZEPHYR_BASE}/../modules/bsim_hw_models/nrf_hw_models/src/HW_models/crc_ble.c
+      )
   endif()
   if(CONFIG_BT_OBSERVER)
     zephyr_library_sources(
