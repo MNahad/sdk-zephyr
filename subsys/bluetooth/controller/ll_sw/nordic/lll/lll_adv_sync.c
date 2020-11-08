@@ -4,6 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+ * File modifications
+ * Copyright (c) 2020 Mohammed Nawabuddin
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <stdbool.h>
 
 #include <zephyr.h>
@@ -89,6 +95,29 @@ static int init_reset(void)
 	return 0;
 }
 
+#if defined(CONFIG_BT_CTLR_DF_SOFTCTE)
+static uint8_t pdu_df[255];
+
+extern void append_crc_ble(uint8_t *buffer, uint32_t len, uint32_t crc_init);
+
+static uint8_t switch_bit_endianness(uint8_t octet) {
+  return ((octet * 0x80200802ULL) & 0x0884422110ULL) * 0x0101010101ULL >> 32;
+}
+
+static void whiten(uint8_t *buffer, size_t len, uint8_t chan) {
+	uint8_t reg = 0x40 | chan;
+	for (uint32_t i = 0; i < len; i++) {
+		for (uint8_t j = 7; j >= 0; j--) {
+			buffer[i] = (buffer[i] & ~(0x01 << j)) |
+				((buffer[i] ^ (reg << j)) & (0x01 << j));
+			reg = ((reg >> 1) & 0x3B) |
+				((reg << 6) & 0x40) |
+				(((reg << 2) ^ (reg >> 1)) & 0x04);
+		}
+	}
+}
+#endif /* CONFIG_BT_CTLR_DF_SOFTCTE */
+
 static int prepare_cb(struct lll_prepare_param *prepare_param)
 {
 	struct lll_adv_sync *lll = prepare_param->param;
@@ -141,7 +170,26 @@ static int prepare_cb(struct lll_prepare_param *prepare_param)
 	lll_chan_set(data_chan_use);
 
 	pdu = lll_adv_sync_data_latest_get(lll, &upd);
+
+#if defined(CONFIG_BT_CTLR_DF_SOFTCTE)
+	memcpy(pdu_df, (void *)pdu, ((pdu->len)+1)+1);
+	append_crc_ble(pdu_df, ((pdu->len)+1)+1,
+			(((uint32_t)lll->crc_init[2] << 16) |
+			((uint32_t)lll->crc_init[1] << 8) |
+			((uint32_t)lll->crc_init[0])));
+	for (uint32_t i = 0; i < ((pdu->len)+1)+1+3; i++) {
+		pdu_df[i] = switch_bit_endianness(pdu_df[i]);
+	}
+	whiten(pdu_df, ((pdu->len)+1)+1, data_chan_use);
+	/* TODO: Get CTETime from CTEInfo in Extended Header */
+	for (uint8_t i = 1; i <= 20; i++) {
+		pdu_df[((pdu->len)+1)+3+i] = 0xFF;
+	}
+	radio_pkt_len_configure(((pdu->len)+1)+3+20);
+	radio_pkt_tx_set(&pdu_df);
+#else /* !CONFIG_BT_CTLR_DF_SOFTCTE */
 	radio_pkt_tx_set(pdu);
+#endif /* CONFIG_BT_CTLR_DF_SOFTCTE */
 
 	/* TODO: chaining */
 	radio_isr_set(lll_isr_done, lll);

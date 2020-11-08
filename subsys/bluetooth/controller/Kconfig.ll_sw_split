@@ -3,6 +3,10 @@
 # Copyright (c) 2016-2017 Nordic Semiconductor ASA
 # SPDX-License-Identifier: Apache-2.0
 
+# File modifications
+# Copyright (c) 2020 Mohammed Nawabuddin
+# SPDX-License-Identifier: Apache-2.0
+
 if BT_LL_SW_SPLIT
 
 config BT_LLL_VENDOR_NORDIC
@@ -161,6 +165,13 @@ config BT_CTLR_ADV_SYNC_SET
 	default 1
 	help
 	  Maximum supported periodic advertising sets.
+
+config BT_CTLR_DF_SOFTCTE
+	bool "Enable CTE support in software"
+	depends on BT_LLL_VENDOR_NORDIC && BT_CTLR_ADV_PERIODIC
+	default n
+	help
+		Enable CTE support in software
 
 config BT_CTRL_ADV_ADI_IN_SCAN_RSP
 	bool "Include ADI in AUX_SCAN_RSP PDU"

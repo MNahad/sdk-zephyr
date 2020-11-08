@@ -5,6 +5,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+ * File modifications
+ * Copyright (c) 2020 Mohammed Nawabuddin
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 typedef void (*radio_isr_cb_t) (void *param);
 
 void isr_radio(void);
@@ -22,6 +28,9 @@ void radio_freq_chan_set(uint32_t chan);
 void radio_whiten_iv_set(uint32_t iv);
 void radio_aa_set(uint8_t *aa);
 void radio_pkt_configure(uint8_t bits_len, uint8_t max_len, uint8_t flags);
+#if defined(CONFIG_BT_CTLR_DF_SOFTCTE)
+void radio_pkt_len_configure(uint8_t max_len);
+#endif /* CONFIG_BT_CTLR_DF_SOFTCTE */
 void radio_pkt_rx_set(void *rx_packet);
 void radio_pkt_tx_set(void *tx_packet);
 uint32_t radio_tx_ready_delay_get(uint8_t phy, uint8_t flags);

@@ -5,6 +5,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+ * File modifications
+ * Copyright (c) 2020 Mohammed Nawabuddin
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <sys/dlist.h>
 #include <sys/mempool_base.h>
 #include <toolchain.h>
@@ -171,8 +177,13 @@ void radio_whiten_iv_set(uint32_t iv)
 	NRF_RADIO->DATAWHITEIV = iv;
 
 	NRF_RADIO->PCNF1 &= ~RADIO_PCNF1_WHITEEN_Msk;
+#if defined(CONFIG_BT_CTLR_DF_SOFTCTE)
+	NRF_RADIO->PCNF1 |= ((0UL) << RADIO_PCNF1_WHITEEN_Pos) &
+			    RADIO_PCNF1_WHITEEN_Msk;
+#else /* !CONFIG_BT_CTLR_DF_SOFTCTE */
 	NRF_RADIO->PCNF1 |= ((1UL) << RADIO_PCNF1_WHITEEN_Pos) &
 			    RADIO_PCNF1_WHITEEN_Msk;
+#endif /* CONFIG_BT_CTLR_DF_SOFTCTE */
 }
 
 void radio_aa_set(uint8_t *aa)
@@ -240,8 +251,14 @@ void radio_pkt_configure(uint8_t bits_len, uint8_t max_len, uint8_t flags)
 	}
 #endif /* CONFIG_SOC_COMPATIBLE_NRF52X */
 
-	NRF_RADIO->PCNF0 = (((1UL) << RADIO_PCNF0_S0LEN_Pos) &
+	NRF_RADIO->PCNF0 = 
+#if defined(CONFIG_BT_CTLR_DF_SOFTCTE)
+				(((0UL) << RADIO_PCNF0_S0LEN_Pos) &
 			    RADIO_PCNF0_S0LEN_Msk) |
+#else /* !CONFIG_BT_CTLR_DF_SOFTCTE */
+				(((1UL) << RADIO_PCNF0_S0LEN_Pos) &
+			    RADIO_PCNF0_S0LEN_Msk) |
+#endif /* CONFIG_BT_CTLR_DF_SOFTCTE */
 			   ((((uint32_t)bits_len) << RADIO_PCNF0_LFLEN_Pos) &
 			    RADIO_PCNF0_LFLEN_Msk) |
 			   ((((uint32_t)8-bits_len) << RADIO_PCNF0_S1LEN_Pos) &
@@ -256,10 +273,23 @@ void radio_pkt_configure(uint8_t bits_len, uint8_t max_len, uint8_t flags)
 			     RADIO_PCNF1_STATLEN_Msk) |
 			    (((3UL) << RADIO_PCNF1_BALEN_Pos) &
 			     RADIO_PCNF1_BALEN_Msk) |
+#if defined(CONFIG_BT_CTLR_DF_SOFTCTE)
+			    (((RADIO_PCNF1_ENDIAN_Big) <<
+			      RADIO_PCNF1_ENDIAN_Pos) &
+			     RADIO_PCNF1_ENDIAN_Msk);
+#else /* !CONFIG_BT_CTLR_DF_SOFTCTE */
 			    (((RADIO_PCNF1_ENDIAN_Little) <<
 			      RADIO_PCNF1_ENDIAN_Pos) &
 			     RADIO_PCNF1_ENDIAN_Msk);
+#endif /* CONFIG_BT_CTLR_DF_SOFTCTE */
 }
+
+#if defined(CONFIG_BT_CTLR_DF_SOFTCTE)
+void radio_pkt_len_configure(uint8_t max_len) {
+	NRF_RADIO->PCNF1 &= ~(RADIO_PCNF1_MAXLEN_Msk);
+	NRF_RADIO->PCNF1 |= (((uint32_t)max_len) << RADIO_PCNF1_MAXLEN_Pos) & RADIO_PCNF1_MAXLEN_Msk;
+}
+#endif /* CONFIG_BT_CTLR_DF_SOFTCTE */
 
 void radio_pkt_rx_set(void *rx_packet)
 {
@@ -401,8 +431,13 @@ void radio_crc_configure(uint32_t polynomial, uint32_t iv)
 	NRF_RADIO->CRCCNF =
 	    (((RADIO_CRCCNF_SKIPADDR_Skip) << RADIO_CRCCNF_SKIPADDR_Pos) &
 	     RADIO_CRCCNF_SKIPADDR_Msk) |
+#if defined(CONFIG_BT_CTLR_DF_SOFTCTE)
+	    (((RADIO_CRCCNF_LEN_Disabled) << RADIO_CRCCNF_LEN_Pos) &
+	       RADIO_CRCCNF_LEN_Msk);
+#else /* !CONFIG_BT_CTLR_DF_SOFTCTE */
 	    (((RADIO_CRCCNF_LEN_Three) << RADIO_CRCCNF_LEN_Pos) &
 	       RADIO_CRCCNF_LEN_Msk);
+#endif /* CONFIG_BT_CTLR_DF_SOFTCTE */
 	NRF_RADIO->CRCPOLY = polynomial;
 	NRF_RADIO->CRCINIT = iv;
 }
