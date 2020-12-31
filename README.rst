@@ -13,6 +13,26 @@
    src="https://badge.buildkite.com/f5bd0dc88306cee17c9b38e78d11bb74a6291e3f40e7d13f31.svg?branch=master"></a>
 
 
+This fork of nRF Connect's sdk-zephyr repository adds support for BLE 5.1
+connectionless Angle of Arrival (AoA) RTLS beacons on non-5.1 compliant nRF hardware.
+
+This is achieved by extending the Nordic BLE stack LLL's Periodic Advertising Extensions
+capability to include the addition of a Constant Tone Extension (CTE).
+
+This CTE capability is implemented purely in software and therefore
+does not require 5.1-compliant hardware such as the nRF52833 or nRF5340.
+
+It can run on BLE 5.0 hardware such as the nRF52840, and has been tested on
+the nRF52840 PCA10059 dongle.
+
+Add `BT_CTLR_DF_SOFTCTE` as a Kconfig flag to enable.
+
+This repository also contains a minimal beacon implementation that does not
+use the bluetooth stack, but rather only uses the nRF Radio, Clock and Timer
+peripherals. It transmits a simple pre-5.0 BLE packet which includes TX Power,
+and also transmits a CTE. Both of these can be used to test positioning and
+RTLS systems without the need for 5.1-compliant hardware.
+
 The Zephyr Project is a scalable real-time operating system (RTOS) supporting
 multiple hardware architectures, optimized for resource constrained devices,
 and built with security in mind.
