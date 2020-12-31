@@ -1,3 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+
+# File modifications
+# Copyright (c) 2020 Mohammed Nawabuddin
+# SPDX-License-Identifier: Apache-2.0
+
 cmake_minimum_required(VERSION 3.8.2)
 
 set(NRF_SUPPORTED_BOARDS

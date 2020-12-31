@@ -1,3 +1,25 @@
+/*
+ * Based on samples/peripheral/radio_test/src/radio_test.c
+ * From https://github.com/nrfconnect/sdk-nrf
+ * 
+ * Copyright (c) 2020 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-BSD-5-Clause-Nordic
+ * 
+ * Depends on function append_crc_ble()
+ * Located at modules/bsim_hw_models/nrf_hw_models/
+ *
+ * Copyright (c) 2017 Oticon A/S
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+ /*
+  * File modifications
+  * Copyright (c) 2020 Mohammed Nawabuddin
+  * SPDX-License-Identifier: Apache-2.0
+  */
+
 #include "radio.h"
 
 #include <drivers/clock_control.h>
@@ -42,6 +64,11 @@ static struct radio_param_config {
   .duty_cycle = 50,
 };
 
+/**
+ * Bitwise reverse 1 byte,
+ * Based on code in the public domain as claimed by the author in this page:
+ * http://graphics.stanford.edu/~seander/bithacks.html#ReverseByteWith64Bits
+ */
 static uint8_t switch_bit_endianness(uint8_t octet) {
   return ((octet * 0x80200802ULL) & 0x0884422110ULL) * 0x0101010101ULL >> 32;
 }

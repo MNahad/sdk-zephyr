@@ -98,8 +98,19 @@ static int init_reset(void)
 #if defined(CONFIG_BT_CTLR_DF_SOFTCTE)
 static uint8_t pdu_df[255];
 
+/**
+ * Dependency located at modules/bsim_hw_models/nrf_hw_models/
+ * Copyright (c) 2017 Oticon A/S
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 extern void append_crc_ble(uint8_t *buffer, uint32_t len, uint32_t crc_init);
 
+/**
+ * Bitwise reverse 1 byte,
+ * Based on code in the public domain as claimed by the author in this page:
+ * http://graphics.stanford.edu/~seander/bithacks.html#ReverseByteWith64Bits
+ */
 static uint8_t switch_bit_endianness(uint8_t octet) {
   return ((octet * 0x80200802ULL) & 0x0884422110ULL) * 0x0101010101ULL >> 32;
 }
